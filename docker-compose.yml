@@ -1,0 +1,11 @@
+services:
+  ouster:
+    image: ros2-ouster-driver
+    build:
+      context: .
+    network_mode: host
+    privileged: true
+    environment:
+      - ROS_DOMAIN_ID=0
+    command: >
+      sensor_hostname:=192.168.200.2 viz:=false
