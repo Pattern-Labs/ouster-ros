@@ -9,6 +9,11 @@ ENV DEBIAN_FRONTEND=noninteractive \
     BUILD_HOME=/var/lib/build \
     OUSTER_ROS_PATH=/opt/ros2_ws/src/ouster-ros
 
+RUN apt-get update && apt-get install -y \
+    ros-${ROS_DISTRO}-rmw-cyclonedds-cpp \
+    ros-${ROS_DISTRO}-cyclonedds
+ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+
 RUN set -xue && \
     apt-get update && \
     apt-get install -y \
