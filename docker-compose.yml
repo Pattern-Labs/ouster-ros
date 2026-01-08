@@ -3,6 +3,8 @@ services:
     image: ros2-ouster-driver
     build:
       context: .
+      args:
+        - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
     network_mode: host
     privileged: true
     environment:

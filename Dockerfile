@@ -1,18 +1,11 @@
 ARG ROS_DISTRO=rolling
-ARG RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+ARG RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 
 FROM ros:${ROS_DISTRO}-ros-core AS build-env
-ARG RMW_IMPLEMENTATION
-ARG ROS_DISTRO
 ENV DEBIAN_FRONTEND=noninteractive \
     RMW_IMPLEMENTATION=${RMW_IMPLEMENTATION} \
     BUILD_HOME=/var/lib/build \
     OUSTER_ROS_PATH=/opt/ros2_ws/src/ouster-ros
-
-RUN apt-get update && apt-get install -y \
-    ros-${ROS_DISTRO}-rmw-cyclonedds-cpp \
-    ros-${ROS_DISTRO}-cyclonedds
-ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 
 RUN set -xue && \
     apt-get update && \
@@ -32,16 +25,10 @@ RUN if [ "$RMW_IMPLEMENTATION" = "rmw_cyclonedds_cpp" ]; then \
         apt-get install -y ros-${ROS_DISTRO}-rmw-zenoh-cpp; \
     fi
 
-# Set up non-root build user
-ARG BUILD_UID=1000
-ARG BUILD_GID=${BUILD_UID}
-
-RUN set -xe \
-&& groupadd -o -g ${BUILD_GID} build \
-&& useradd -o -u ${BUILD_UID} -d ${BUILD_HOME} -rm -s /bin/bash -g build build
-
 # Set up build environment
-COPY --chown=build:build . $OUSTER_ROS_PATH
+COPY ouster-ros $OUSTER_ROS_PATH/ouster-ros
+COPY ouster-sensor-msgs $OUSTER_ROS_PATH/ouster-sensor-msgs
+COPY LICENSE $OUSTER_ROS_PATH/LICENSE
 
 RUN set -xe         \
 && apt-get update   \
@@ -49,8 +36,6 @@ RUN set -xe         \
 && rosdep update --rosdistro=$ROS_DISTRO \
 && rosdep install --from-paths $OUSTER_ROS_PATH -y --ignore-src
 
-
-USER build:build
 WORKDIR ${BUILD_HOME}
 
 RUN set -xe \
