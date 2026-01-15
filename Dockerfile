@@ -60,6 +60,7 @@ COPY cyclonedds.xml /opt/ros/cyclonedds.xml
 # Usage: docker run --rm -it ouster-ros [sensor.launch parameters ..]
 #
 ENTRYPOINT ["bash", "-c", "set -e \
+    && source /opt/ros/jazzy/setup.bash \
     && source ./install/setup.bash \
     && ros2 launch ouster_ros sensor.launch.xml \"$@\" \
     ", "ros-entrypoint"]
