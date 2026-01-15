@@ -1,9 +1,7 @@
 ARG ROS_DISTRO=rolling
-ARG RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 
 FROM ros:${ROS_DISTRO}-ros-core AS build-env
 ENV DEBIAN_FRONTEND=noninteractive \
-    RMW_IMPLEMENTATION=${RMW_IMPLEMENTATION} \
     BUILD_HOME=/var/lib/build \
     OUSTER_ROS_PATH=/opt/ros2_ws/src/ouster-ros
 
@@ -19,11 +17,7 @@ RUN set -xue && \
     python3-bloom \
     python3-colcon-common-extensions
 
-RUN if [ "$RMW_IMPLEMENTATION" = "rmw_cyclonedds_cpp" ]; then \
-    apt-get install -y ros-${ROS_DISTRO}-rmw-cyclonedds-cpp; \
-    elif [ "$RMW_IMPLEMENTATION" = "rmw_zenoh_cpp" ]; then \
-    apt-get install -y ros-${ROS_DISTRO}-rmw-zenoh-cpp; \
-    fi
+RUN apt-get install -y ros-${ROS_DISTRO}-rmw-cyclonedds-cpp
 
 # Set up build environment
 COPY ouster-ros $OUSTER_ROS_PATH/ouster-ros
@@ -60,7 +54,7 @@ COPY cyclonedds.xml /opt/ros/cyclonedds.xml
 # Usage: docker run --rm -it ouster-ros [sensor.launch parameters ..]
 #
 ENTRYPOINT ["bash", "-c", "set -e \
-    && source /opt/ros/jazzy/setup.bash \
+    && source /opt/ros/${ROS_DISTRO}/setup.bash \
     && source ./install/setup.bash \
     && ros2 launch ouster_ros sensor.launch.xml \"$@\" \
     ", "ros-entrypoint"]
