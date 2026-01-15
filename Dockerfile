@@ -10,19 +10,19 @@ ENV DEBIAN_FRONTEND=noninteractive \
 RUN set -xue && \
     apt-get update && \
     apt-get install -y \
-        build-essential \
-        cmake \
-        fakeroot \
-        dpkg-dev \
-        python3-rosdep \
-        python3-rospkg \
-        python3-bloom \
-        python3-colcon-common-extensions
+    build-essential \
+    cmake \
+    fakeroot \
+    dpkg-dev \
+    python3-rosdep \
+    python3-rospkg \
+    python3-bloom \
+    python3-colcon-common-extensions
 
 RUN if [ "$RMW_IMPLEMENTATION" = "rmw_cyclonedds_cpp" ]; then \
-        apt-get install -y ros-${ROS_DISTRO}-rmw-cyclonedds-cpp; \
+    apt-get install -y ros-${ROS_DISTRO}-rmw-cyclonedds-cpp; \
     elif [ "$RMW_IMPLEMENTATION" = "rmw_zenoh_cpp" ]; then \
-        apt-get install -y ros-${ROS_DISTRO}-rmw-zenoh-cpp; \
+    apt-get install -y ros-${ROS_DISTRO}-rmw-zenoh-cpp; \
     fi
 
 # Set up build environment
@@ -31,16 +31,16 @@ COPY ouster-sensor-msgs $OUSTER_ROS_PATH/ouster-sensor-msgs
 COPY LICENSE $OUSTER_ROS_PATH/LICENSE
 
 RUN set -xe         \
-&& apt-get update   \
-&& rosdep init      \
-&& rosdep update --rosdistro=$ROS_DISTRO \
-&& rosdep install --from-paths $OUSTER_ROS_PATH -y --ignore-src
+    && apt-get update   \
+    && rosdep init      \
+    && rosdep update --rosdistro=$ROS_DISTRO \
+    && rosdep install --from-paths $OUSTER_ROS_PATH -y --ignore-src
 
 WORKDIR ${BUILD_HOME}
 
 RUN set -xe \
-&& mkdir src \
-&& cp -R $OUSTER_ROS_PATH ./src
+    && mkdir src \
+    && cp -R $OUSTER_ROS_PATH ./src
 FROM build-env
 ARG ROS_DISTRO
 
@@ -53,11 +53,13 @@ RUN source /opt/ros/$ROS_DISTRO/setup.bash && colcon build \
 RUN source /opt/ros/$ROS_DISTRO/setup.bash && colcon test \
     --ctest-args tests ouster_ros --rerun-failed --output-on-failure
 
+COPY cyclonedds.xml /opt/ros/cyclonedds.xml
+
 # Entrypoint for running Ouster ros:
 #
 # Usage: docker run --rm -it ouster-ros [sensor.launch parameters ..]
 #
 ENTRYPOINT ["bash", "-c", "set -e \
-&& source ./install/setup.bash \
-&& ros2 launch ouster_ros sensor.launch.xml \"$@\" \
-", "ros-entrypoint"]
+    && source ./install/setup.bash \
+    && ros2 launch ouster_ros sensor.launch.xml \"$@\" \
+    ", "ros-entrypoint"]
